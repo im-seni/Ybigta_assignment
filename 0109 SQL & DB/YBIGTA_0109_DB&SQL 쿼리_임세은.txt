@@ -1,0 +1,36 @@
+# YBIGTA_0109_DB&SQL_임세은
+
+# 1) 전체 구매 고객에 대하여 고객별 총구매 금액 출력
+SELECT C.CustomerID, C.CustomerName, SUM(OD.Quantity * P.Price) AS "구매금액" 
+FROM Orders as O
+LEFT OUTER JOIN Customers as C ON O.CustomerID = C.CustomerID
+LEFT OUTER JOIN OrderDetails as OD ON O.OrderID = OD.OrderID
+LEFT OUTER JOIN Products as P ON OD.ProductID = P.ProductID
+GROUP BY C.CustomerID;
+
+# 2) 2000개 이상 판매가 이루어진 카테고리 이름과 총 판매량, 판매금액 내림차순 출력
+SELECT CT.CategoryName, 
+SUM(OD.Quantity) AS "판매량", 
+SUM(OD.Quantity * P.Price) AS "판매금액"
+FROM OrderDetails as OD
+LEFT OUTER JOIN Products as P ON OD.ProductID = P.ProductID
+LEFT OUTER JOIN Categories as CT ON P.CategoryID = CT.CategoryID
+GROUP BY CT.CategoryName
+HAVING SUM(OD.Quantity) > 2000
+ORDER BY SUM(OD.Quantity) DESC;
+
+#3) 'Seafood'보다 더 많은 판매금액을 기록한 카테고리 이름, 총 판매량, 판매금액 내림차순 출력
+SELECT CT.CategoryName, 
+SUM(OD.Quantity) AS "판매량", 
+SUM(OD.Quantity * P.Price) AS "판매금액"
+FROM OrderDetails as OD
+LEFT OUTER JOIN Products as P ON OD.ProductID = P.ProductID
+LEFT OUTER JOIN Categories as CT ON P.CategoryID = CT.CategoryID
+GROUP BY CT.CategoryName
+HAVING SUM(OD.Quantity) > 2000 and
+SUM(OD.Quantity * P.Price) > (SELECT SUM(OD.Quantity * P.Price) 
+FROM OrderDetails as OD
+LEFT OUTER JOIN Products as P ON OD.ProductID = P.ProductID
+LEFT OUTER JOIN Categories as CT ON P.CategoryID = CT.CategoryID
+WHERE CT.CategoryName = "Seafood")
+ORDER BY SUM(OD.Quantity) DESC;
